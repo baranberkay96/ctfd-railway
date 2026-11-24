@@ -73,6 +73,7 @@ def setup(name, email, password) -> None:
         RegistrationVisibilityTypes,
         ScoreVisibilityTypes,
     )
+    from CTFd.constants.themes import DEFAULT_THEME
     from CTFd.models import Admins, Pages, Users, db
     from CTFd.utils import set_config
     from flask import url_for
@@ -106,7 +107,7 @@ def setup(name, email, password) -> None:
     set_config("ctf_name", ctf_name)
     set_config("ctf_description", description)
     set_config("user_mode", user_mode)
-    set_config("ctf_theme", "core-beta")
+    set_config("ctf_theme", DEFAULT_THEME)
     set_config("start", None)
     set_config("end", None)
     set_config("freeze", None)
