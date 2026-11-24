@@ -1,0 +1,264 @@
+{
+  "name": "CTFd 3.8 Capture The Flag",
+  "description": "CTF platform with MariaDB and Redis, admin pre-created, no open setup page",
+  "category": "Other",
+  "tags": [
+    "ctfd",
+    "ctf",
+    "capture-the-flag",
+    "security",
+    "cybersecurity",
+    "education",
+    "mariadb",
+    "redis"
+  ],
+  "image": "https://cdn.jsdelivr.net/gh/CTFd/CTFd@3.8.9/CTFd/themes/core/static/img/logo.png",
+  "upstream": {
+    "ctfd": "ctfd/ctfd:3.8.9@sha256:84aff1e50b6a6f931b5da90c6f5b7c623ba4583217a9b00e9d4c1b7c53b9739f (CTFd 3.8.9, 2026-10-22)",
+    "mariadb": "mariadb:10.11.19@sha256:e5fe75b2b9de0eb9f6f9a4d9c97272fb3a7480e389ccd487a786bab2a12cc0d7 (LTS, as in CTFd's docker-compose)",
+    "redis": "redis:8.8.4-alpine@sha256:1273af45b299d2b8b60d0e400d90aa6c2c5b1794f01d6a7ca60ff3ba6e65efb5",
+    "license": "CTFd: Apache-2.0",
+    "checked": "2026-11-24"
+  },
+  "services": {
+    "CTFd": {
+      "icon": "https://cdn.jsdelivr.net/gh/CTFd/CTFd@3.8.9/CTFd/themes/core/static/img/logo.png",
+      "source": {
+        "repo": "baranberkay96/ctfd-railway",
+        "rootDirectory": "/services/ctfd"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": "/healthcheck",
+      "healthcheckTimeout": 900,
+      "restartPolicyType": "ALWAYS",
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": true,
+      "targetPort": 8000,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/var/uploads"
+      },
+      "variables": {
+        "PORT": {
+          "defaultValue": "8000",
+          "description": "Port CTFd's web server listens on (Railway's healthcheck and domain use it).",
+          "required": true
+        },
+        "CTFD_NAME": {
+          "defaultValue": "CTF",
+          "description": "Name of your event, used by the first-boot setup (change it later in Admin Panel > Config).",
+          "required": true
+        },
+        "CTFD_DESCRIPTION": {
+          "defaultValue": "",
+          "description": "Short event description for the first-boot setup.",
+          "required": false
+        },
+        "CTFD_USER_MODE": {
+          "defaultValue": "users",
+          "description": "users = players compete alone; teams = players join teams. Used by the first-boot setup.",
+          "required": false
+        },
+        "CTFD_REGISTRATION": {
+          "defaultValue": "public",
+          "description": "public = anyone can register; private = only admins create accounts. Used by the first-boot setup.",
+          "required": false
+        },
+        "CTFD_ADMIN_NAME": {
+          "defaultValue": "admin",
+          "description": "Administrator created by the first-boot setup (no open /setup page).",
+          "required": true
+        },
+        "CTFD_ADMIN_EMAIL": {
+          "defaultValue": "admin@example.com",
+          "description": "E-mail of the administrator (change it later in the admin's profile).",
+          "required": true
+        },
+        "CTFD_ADMIN_PASSWORD": {
+          "defaultValue": "${{secret(24, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Administrator password (8-128 characters). Used on the first boot, or with CTFD_ADMIN_PASSWORD_RESET=true.",
+          "required": true
+        },
+        "CTFD_ADMIN_PASSWORD_RESET": {
+          "defaultValue": "false",
+          "description": "true = set the administrator's password to CTFD_ADMIN_PASSWORD on the next boot (recovery). Set back to false afterwards.",
+          "required": false
+        },
+        "SECRET_KEY": {
+          "defaultValue": "${{secret(64)}}",
+          "description": "Signs sessions and tokens. Keep it unchanged after the first boot.",
+          "required": true
+        },
+        "DATABASE_URL": {
+          "defaultValue": "mysql+pymysql://${{MariaDB.MARIADB_USER}}:${{MariaDB.MARIADB_PASSWORD}}@${{MariaDB.RAILWAY_PRIVATE_DOMAIN}}:3306/${{MariaDB.MARIADB_DATABASE}}",
+          "description": "MariaDB connection on the private network.",
+          "required": true
+        },
+        "REDIS_URL": {
+          "defaultValue": "${{Redis.REDIS_URL}}",
+          "description": "Redis cache (sessions, scoreboard cache, rate limits) on the private network.",
+          "required": true
+        },
+        "UPLOAD_FOLDER": {
+          "defaultValue": "/var/uploads",
+          "description": "Challenge files and uploads (on the volume).",
+          "required": true
+        },
+        "REVERSE_PROXY": {
+          "defaultValue": "true",
+          "description": "Trust Railway's proxy headers (real client IPs, https links).",
+          "required": true
+        },
+        "WORKERS": {
+          "defaultValue": "2",
+          "description": "Gunicorn worker processes (gevent). Raise for big events together with the service's memory.",
+          "required": false
+        },
+        "SERVER_SENT_EVENTS": {
+          "defaultValue": "true",
+          "description": "Live notifications to players (server-sent events).",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "30",
+          "description": "Seconds CTFd gets to finish requests on redeploy.",
+          "required": false
+        }
+      }
+    },
+    "MariaDB": {
+      "icon": "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/mariadb.svg",
+      "source": {
+        "image": "mariadb:10.11.19@sha256:e5fe75b2b9de0eb9f6f9a4d9c97272fb3a7480e389ccd487a786bab2a12cc0d7"
+      },
+      "startCommand": "/bin/sh -c \"rm -rf /var/lib/mysql/lost+found && exec docker-entrypoint.sh mariadbd --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --wait_timeout=28800 --log-warnings=0 '--bind-address=*' --innodb-buffer-pool-size=${MARIADB_INNODB_BUFFER_POOL_SIZE:-256M}\"",
+      "preDeployCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/var/lib/mysql"
+      },
+      "variables": {
+        "MARIADB_ROOT_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Root password, generated at deploy (letters and digits, URL-safe). Used by the backup job. Changing it later needs ALTER USER as well.",
+          "required": true
+        },
+        "MARIADB_DATABASE": {
+          "defaultValue": "ctfd",
+          "description": "Database created on the first boot (CTFd's database).",
+          "required": true
+        },
+        "MARIADB_USER": {
+          "defaultValue": "ctfd",
+          "description": "CTFd's database user, created on the first boot.",
+          "required": true
+        },
+        "MARIADB_PASSWORD": {
+          "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "App user password, generated at deploy. Changing it later needs ALTER USER as well.",
+          "required": true
+        },
+        "MARIADB_AUTO_UPGRADE": {
+          "defaultValue": "1",
+          "description": "Run mariadb-upgrade automatically after an image upgrade.",
+          "required": false
+        },
+        "MARIADB_INNODB_BUFFER_POOL_SIZE": {
+          "defaultValue": "256M",
+          "description": "InnoDB buffer pool (main memory knob). Raise it for large events.",
+          "required": false
+        },
+        "MYSQLHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Private hostname of this database (for the Data panel and other services).",
+          "required": false
+        },
+        "MYSQLPORT": {
+          "defaultValue": "3306",
+          "description": "MariaDB port (private network).",
+          "required": false
+        },
+        "MYSQLUSER": {
+          "defaultValue": "${{MARIADB_USER}}",
+          "description": "User for the Data panel.",
+          "required": false
+        },
+        "MYSQLPASSWORD": {
+          "defaultValue": "${{MARIADB_PASSWORD}}",
+          "description": "Password of MYSQLUSER.",
+          "required": false
+        },
+        "MYSQLDATABASE": {
+          "defaultValue": "${{MARIADB_DATABASE}}",
+          "description": "Database for the Data panel.",
+          "required": false
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "60",
+          "description": "Seconds MariaDB gets to shut down cleanly on redeploy.",
+          "required": false
+        }
+      }
+    },
+    "Redis": {
+      "icon": "https://cdn.sanity.io/images/sy1jschh/production/0ce0bfdcfbdbf69662b1116671f97c2dd788b655-157x157.svg",
+      "source": {
+        "image": "redis:8.8.4-alpine@sha256:1273af45b299d2b8b60d0e400d90aa6c2c5b1794f01d6a7ca60ff3ba6e65efb5"
+      },
+      "startCommand": "/bin/sh -c \"rm -rf $RAILWAY_VOLUME_MOUNT_PATH/lost+found/ && exec docker-entrypoint.sh redis-server --requirepass $REDIS_PASSWORD --save 60 1 --dir $RAILWAY_VOLUME_MOUNT_PATH --maxmemory 256mb --maxmemory-policy allkeys-lru\"",
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/data"
+      },
+      "variables": {
+        "REDISHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Private network hostname of the Redis service, only resolvable from services in the same environment",
+          "required": true
+        },
+        "REDISPORT": {
+          "defaultValue": "6379",
+          "description": "Port that Redis listens on",
+          "required": true
+        },
+        "REDISUSER": {
+          "defaultValue": "default",
+          "description": "Username for authenticating with Redis",
+          "required": true
+        },
+        "REDIS_URL": {
+          "defaultValue": "redis://${{ REDISUSER }}:${{ REDIS_PASSWORD }}@${{ REDISHOST }}:${{ REDISPORT }}",
+          "description": "Connection string for connecting to Redis using the private network",
+          "required": true
+        },
+        "REDISPASSWORD": {
+          "defaultValue": "${{REDIS_PASSWORD}}",
+          "description": "Alias of REDIS_PASSWORD for clients that expect the unseparated name",
+          "required": true
+        },
+        "REDIS_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "description": "Randomly generated password for authenticating with Redis",
+          "required": true
+        }
+      },
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "preDeployCommand": null
+    }
+  }
+}
