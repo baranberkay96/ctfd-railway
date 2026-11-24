@@ -149,7 +149,7 @@
       "variables": {
         "MARIADB_ROOT_PASSWORD": {
           "defaultValue": "${{secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
-          "description": "Root password, generated at deploy (letters and digits, URL-safe). Used by the backup job. Changing it later needs ALTER USER as well.",
+          "description": "Root password, generated at deploy (letters and digits, URL-safe). MariaDB root account for admin tasks; CTFd connects with its own MARIADB_USER. Changing it later needs ALTER USER as well.",
           "required": true
         },
         "MARIADB_DATABASE": {
