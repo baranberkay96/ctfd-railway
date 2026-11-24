@@ -18,6 +18,8 @@ fi
 
 cd /opt/CTFd || exit 1
 export HOME=/opt/CTFd
+# railway_bootstrap.py lives in /opt/railway; CTFd must be importable from there.
+export PYTHONPATH="/opt/CTFd${PYTHONPATH:+:${PYTHONPATH}}"
 
 PORT="${PORT:-8000}"
 [[ "${PORT}" =~ ^[0-9]{2,5}$ ]] || { log "WARNING: PORT='${PORT}' is not a port; using 8000."; PORT=8000; }
