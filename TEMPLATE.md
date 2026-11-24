@@ -34,15 +34,15 @@ Market (2026-11): `ctfd/ctfd:latest` with SQLite on a volume, no Redis, setup wi
 
 ## Resources
 
-Measured on Railway (see `_reports/round13/200-ctfd.md`).
+Measured on Railway, test project, 2026-11-24 (CTFd 3.8.9, MariaDB 10.11.19, Redis 8.8.4):
 
 | Service | Idle RAM | CPU idle |
 |---|---|---|
-| CTFd (2 workers) | ~0.3 GB | ~0 vCPU |
-| MariaDB (256 MB buffer pool) | ~0.1 GB | ~0 vCPU |
-| Redis | ~0.01 GB | ~0 vCPU |
+| CTFd (2 workers) | 0.16-0.23 GB (0.28 GB peak) | ~0.01 vCPU |
+| MariaDB (256 MB buffer pool) | 0.18 GB | ~0 vCPU |
+| Redis | 0.03 GB | ~0 vCPU |
 
-Estimate: ≈ $4-7/month for a small event. Every plan works (each service is far below 1 GB).
+Estimate: ≈ 0.44 GB total → ≈ $5-8/month for a small event. Every plan works (each service is far below 1 GB).
 
 Railway prices: RAM $10/GB-month, vCPU $20/vCPU-month, volume $0.15/GB-month.
 

@@ -53,7 +53,7 @@ Invalid values never break the deploy: an unusable admin name or e-mail falls ba
 
 **Backups.** Export the whole CTF (challenges, users, submissions and files) from Admin Panel > Config > Backup, and use Railway volume backups for MariaDB and the uploads volume.
 
-**Resources and plans.** Measured on Railway (2026-11-24): CTFd about 0.3 GB of RAM at idle with 2 workers, MariaDB about 0.1 GB and Redis a few MB, so a small event costs roughly $4-7 a month at Railway's usage prices. Every plan works for small events; use Hobby or Pro for public competitions.
+**Resources and plans.** Measured on Railway (2026-11-24): CTFd about 0.23 GB of RAM at idle with 2 workers, MariaDB about 0.18 GB and Redis about 0.03 GB, so a small event costs roughly $5-8 a month at Railway's usage prices. Every plan works for small events; use Hobby or Pro for public competitions.
 
 **Upgrading CTFd.** The version is pinned in `services/ctfd/Dockerfile` (tag and digest). Database migrations run automatically at start (`flask db upgrade`). Export a backup before a major upgrade and read the release notes.
 
