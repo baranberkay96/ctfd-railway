@@ -1,5 +1,7 @@
 # Deploy and Host CTFd with Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/ctfd-38-capture-the-flag?referralCode=20H68q)
+
 CTFd is an open-source Capture The Flag platform for security competitions, training and classroom exercises. This community template runs CTFd 3.8.9 with MariaDB and Redis, finishes CTFd's setup wizard for you from Railway variables, and creates the administrator before the site goes online, so the setup page is never open on the internet.
 
 ## About Hosting CTFd
